@@ -1,0 +1,20 @@
+# Example .github/workflows/ui-tests.yml
+name: UI Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and Test
+      run: |
+        xcodebuild test \
+          -scheme weather \
+          -destination 'platform=iOS Simulator,name=iPhone 14' \
+          -testPlan WeatherUITests
