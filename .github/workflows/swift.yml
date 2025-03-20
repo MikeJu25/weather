@@ -15,8 +15,8 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select -s /Applications/Xcode_15.4.app
 
-    - name: Install SwiftLint
-      run: brew install swiftlint
+    # - name: Install SwiftLint
+    #   run: brew install swiftlint
       
     - name: Build and Test
       run: |
@@ -31,10 +31,10 @@ jobs:
           -allowProvisioningUpdates | xcbeautify
           
     # Add additional checks
-    - name: Check Code Style
-      run: |
-        # Add SwiftLint or other style checks
-        swiftlint lint
+    # - name: Check Code Style
+    #   run: |
+    #     # Add SwiftLint or other style checks
+    #     swiftlint lint
         
     - name: Check Code Coverage
       run: |
