@@ -1,6 +1,6 @@
 import Foundation
 
-struct StoredCity: Identifiable, Codable, Equatable {
+struct StoredCity: Identifiable, Codable {
     let id: UUID
     let name: String
     var weather: Weather?
@@ -9,10 +9,6 @@ struct StoredCity: Identifiable, Codable, Equatable {
         self.id = id
         self.name = name
         self.weather = weather
-    }
-    
-    static func == (lhs: StoredCity, rhs: StoredCity) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name
     }
 }
 

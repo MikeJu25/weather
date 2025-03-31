@@ -12,7 +12,7 @@ struct ContentView: View {
     @State private var isSearching = false
     
     let weatherService = WeatherService()
-    let userDefaultsKey = "storedCities"
+    private let userDefaultsKey = "storedCities"
 
     var body: some View {
         NavigationView {
@@ -123,7 +123,7 @@ struct ContentView: View {
         }
     }
     
-    func loadStoredCities() {
+    private func loadStoredCities() {
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
            let cities = try? JSONDecoder().decode([StoredCity].self, from: data) {
             storedCities = cities
@@ -134,13 +134,13 @@ struct ContentView: View {
         }
     }
     
-    func saveStoredCities() {
+    private func saveStoredCities() {
         if let encoded = try? JSONEncoder().encode(storedCities) {
             UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
         }
     }
     
-    func searchCities(query: String) {
+    private func searchCities(query: String) {
         weatherService.searchCities(query: query) { result in
             DispatchQueue.main.async {
                 switch result {
@@ -154,7 +154,7 @@ struct ContentView: View {
         }
     }
     
-    func refreshWeather(for city: StoredCity) {
+    private func refreshWeather(for city: StoredCity) {
         weatherService.fetchWeather(for: city.name) { result in
             DispatchQueue.main.async {
                 switch result {
@@ -171,7 +171,7 @@ struct ContentView: View {
         }
     }
     
-    func addNewCity() {
+    private func addNewCity() {
         guard !newCityName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             errorMessage = "Please enter a city name"
             return
@@ -214,7 +214,7 @@ struct ContentView: View {
         suggestions = []
     }
     
-    func removeCity(_ city: StoredCity) {
+    private func removeCity(_ city: StoredCity) {
         storedCities.removeAll { $0.id == city.id }
         saveStoredCities() // Save after removing city
     }
