@@ -1,43 +1,122 @@
-//
-//  weatherUITests.swift
-//  weatherUITests
-//
-//  Created by Mike Ju on 2025-01-11.
-//
-
 import XCTest
 
-final class weatherUITests: XCTestCase {
-
+final class WeatherUITests: XCTestCase {
+    var app: XCUIApplication!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
+        app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
-
-    @MainActor
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
+    
+    override func tearDownWithError() throws {
+        app = nil
     }
-}
+    
+    func testInitialUIState() throws {
+        // Test initial UI elements are present
+        XCTAssertTrue(app.textFields["City input field"].exists)
+        XCTAssertTrue(app.buttons["Get weather button"].exists)
+        XCTAssertEqual(app.textFields["City input field"].value as? String, "London")
+    }
+    
+    func testEmptyCityInput() throws {
+        // Clear the city input
+        let cityTextField = app.textFields["City input field"]
+        cityTextField.tap()
+        cityTextField.typeText("")
+        
+        // Tap the get weather button
+        app.buttons["Get weather button"].tap()
+        
+        // Verify error message appears
+        XCTAssertTrue(app.staticTexts["Please enter a city name"].exists)
+    }
+    
+    func testValidCityInput() throws {
+        // Enter a valid city
+        let cityTextField = app.textFields["City input field"]
+        cityTextField.tap()
+        cityTextField.typeText("Paris")
+        
+        // Tap the get weather button
+        app.buttons["Get weather button"].tap()
+        
+        // Wait for loading indicator to disappear
+        let loadingIndicator = app.progressIndicators.element
+        XCTAssertTrue(loadingIndicator.exists)
+        
+        // Wait for weather data to appear
+        let weatherTitle = app.staticTexts["Weather in Paris"]
+        let exists = weatherTitle.waitForExistence(timeout: 5.0)
+        XCTAssertTrue(exists)
+        
+        // Verify weather information is displayed
+        XCTAssertTrue(app.staticTexts["Temperature"].exists)
+        XCTAssertTrue(app.staticTexts["Feels Like"].exists)
+        XCTAssertTrue(app.staticTexts["Description"].exists)
+        XCTAssertTrue(app.staticTexts["Humidity"].exists)
+        XCTAssertTrue(app.staticTexts["Wind"].exists)
+    }
+    
+    func testLoadingState() throws {
+        // Enter a city
+        let cityTextField = app.textFields["City input field"]
+        cityTextField.tap()
+        cityTextField.typeText("Tokyo")
+        
+        // Tap the get weather button
+        app.buttons["Get weather button"].tap()
+        
+        // Verify loading indicator appears
+        let loadingIndicator = app.progressIndicators.element
+        XCTAssertTrue(loadingIndicator.exists)
+        
+        // Wait for loading to complete
+        let weatherTitle = app.staticTexts["Weather in Tokyo"]
+        let exists = weatherTitle.waitForExistence(timeout: 5.0)
+        XCTAssertTrue(exists)
+        
+        // Verify loading indicator is gone
+        XCTAssertFalse(loadingIndicator.exists)
+    }
+    
+    func testErrorHandling() throws {
+        // Enter an invalid city name with special characters
+        let cityTextField = app.textFields["City input field"]
+        cityTextField.tap()
+        cityTextField.typeText("@@@")
+        
+        // Tap the get weather button
+        app.buttons["Get weather button"].tap()
+        
+        // Wait for error alert to appear
+        let errorAlert = app.alerts["Error"]
+        let alertExists = errorAlert.waitForExistence(timeout: 5.0)
+        XCTAssertTrue(alertExists)
+        
+        // Tap OK on the alert
+        errorAlert.buttons["OK"].tap()
+        
+        // Verify alert is dismissed
+        XCTAssertFalse(errorAlert.exists)
+    }
+    
+    func testKeyboardHandling() throws {
+        // Tap the text field
+        let cityTextField = app.textFields["City input field"]
+        cityTextField.tap()
+        
+        // Verify keyboard appears
+        XCTAssertTrue(app.keyboards.element.exists)
+        
+        // Type a city name
+        cityTextField.typeText("New York")
+        
+        // Tap outside to dismiss keyboard
+        app.staticTexts["Weather in London"].tap()
+        
+        // Verify keyboard is dismissed
+        XCTAssertFalse(app.keyboards.element.exists)
+    }
+} 
